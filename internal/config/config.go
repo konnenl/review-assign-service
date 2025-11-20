@@ -21,9 +21,13 @@ func LoadConfig() (*Config, error) {
 	if dbUrl == "" {
 		return nil, fmt.Errorf("DATABASE_URL is not set in .env")
 	}
+	serverPort := getEnv("SERVER_PORT", ":8080")
+	if serverPort[0] != ':' {
+		serverPort = ":" + serverPort
+	}
 
 	return &Config{
-		ServerPort: getEnv("SERVER_PORT", ":8080"),
+		ServerPort: serverPort,
 		DB_url:     dbUrl,
 	}, nil
 }
