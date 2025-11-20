@@ -7,6 +7,8 @@ import (
 	"github.com/konnen/review-assign-service/internal/config"
 	"github.com/konnen/review-assign-service/internal/handler"
 	"github.com/konnen/review-assign-service/internal/middleware/logger"
+	"github.com/konnen/review-assign-service/internal/repository"
+	"github.com/konnen/review-assign-service/internal/service"
 	"log/slog"
 	"net/http"
 	"os"
@@ -23,18 +25,22 @@ func main() {
 		os.Exit(1)
 	}
 	lgr.Info("config loaded", "cfg", cfg)
-	h := handler.New(lgr)
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.URLFormat)
-	r.Use(logger.New(lgr))
 
-	h.InitRoutes(r)
+	r := repository.NewRepository()
+	s := service.NewService(r.Team)
+	h := handler.NewHandler(lgr, s.Team)
+
+	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
+	router.Use(logger.New(lgr))
+
+	h.InitRoutes(router)
 
 	srv := &http.Server{
 		Addr:    cfg.ServerPort,
-		Handler: r,
+		Handler: router,
 	}
 
 	lgr.Info("starting Server ...")
