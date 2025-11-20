@@ -1,0 +1,17 @@
+CREATE TABLE IF NOT EXISTS users(
+    id VARCHAR(255) PRIMARY KEY, 
+    name VARCHAR(255) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT true
+);
+
+CREATE TABLE IF NOT EXISTS teams(
+    name VARCHAR(255) PRIMARY KEY
+);
+
+CREATE TABLE IF NOT EXISTS users_teams(
+    user_id VARCHAR(255) NOT NULL, 
+    team_name VARCHAR(255) NOT NULL,
+    PRIMARY KEY (user_id, team_name),
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_team FOREIGN KEY (team_name) REFERENCES teams(name) ON DELETE CASCADE
+);
