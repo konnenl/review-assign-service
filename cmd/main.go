@@ -10,6 +10,7 @@ import (
 	"github.com/konnen/review-assign-service/internal/repository"
 	"github.com/konnen/review-assign-service/internal/service"
 	"github.com/konnen/review-assign-service/internal/database/postgres"
+	"github.com/konnen/review-assign-service/internal/validator"
 	"log/slog"
 	"net/http"
 	"os"
@@ -33,9 +34,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	v := validator.NewValidator()
+
 	r := repository.NewRepository(db)
 	s := service.NewService(r.Team)
-	h := handler.NewHandler(lgr, s.Team)
+	h := handler.NewHandler(lgr, v, s.Team)
 
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
