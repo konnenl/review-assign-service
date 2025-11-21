@@ -2,24 +2,19 @@ package config
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"os"
 )
 
 type Config struct {
 	ServerPort string
-	DB_url     string
+	DBUrl     string
 }
 
 func LoadConfig() (*Config, error) {
 	const pth = "config.LoadConfig"
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", pth, err)
-	}
-	dbUrl := getEnv("DATABASE_URL", "")
+	dbUrl := getEnv("POSTGRES_URL", "")
 	if dbUrl == "" {
-		return nil, fmt.Errorf("DATABASE_URL is not set in .env")
+		return nil, fmt.Errorf("POSTGRES_URL is not set in .env")
 	}
 	serverPort := getEnv("SERVER_PORT", ":8080")
 	if serverPort[0] != ':' {
@@ -28,7 +23,7 @@ func LoadConfig() (*Config, error) {
 
 	return &Config{
 		ServerPort: serverPort,
-		DB_url:     dbUrl,
+		DBUrl:     dbUrl,
 	}, nil
 }
 

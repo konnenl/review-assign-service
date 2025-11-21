@@ -1,21 +1,44 @@
-version: '1'
-
 services:
   db:
-    container_name: db
+    container_name: review-assign-db
     image: postgres:15.15-alpine
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+    networks:
+      - app-network
   migrate:
+    container_name: review-assign-migrate
     image: migrate/migrate
     volumes:
       - ./migrations:/migrations
     entrypoint: ["sh", "-c"]
     command: >
-      "sleep 3 && migrate -path=/migrations -database=${DATABASE_URL} up"
+      "migrate -path=/migrations -database=${POSTGRES_URL} up"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+  app:
+    build: .
+    container_name: review-assign-backend
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "${SERVER_PORT}:8080"
+    env_file:
+      - .env
+    command: ["/app/main"]
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
