@@ -9,6 +9,7 @@ import (
 	"github.com/konnen/review-assign-service/internal/middleware/logger"
 	"github.com/konnen/review-assign-service/internal/repository"
 	"github.com/konnen/review-assign-service/internal/service"
+	"github.com/konnen/review-assign-service/internal/database/postgres"
 	"log/slog"
 	"net/http"
 	"os"
@@ -26,7 +27,13 @@ func main() {
 	}
 	lgr.Info("config loaded", "cfg", cfg)
 
-	r := repository.NewRepository()
+	db, err := postgres.OpenDB(cfg.DBUrl)
+	if err != nil {
+		lgr.Error("failed to connect database", "error", err)
+		os.Exit(1)
+	}
+
+	r := repository.NewRepository(db)
 	s := service.NewService(r.Team)
 	h := handler.NewHandler(lgr, s.Team)
 
@@ -43,7 +50,7 @@ func main() {
 		Handler: router,
 	}
 
-	lgr.Info("starting Server ...")
+	lgr.Info("starting server ...")
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			lgr.Error("listen: %s\\n", err)
@@ -54,7 +61,7 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	lgr.Info("shutdown Server ...")
+	lgr.Info("shutdown server ...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

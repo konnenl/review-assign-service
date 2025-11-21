@@ -1,11 +1,15 @@
 package repository
 
+import(
+	"database/sql"
+)
+
 type Repository struct {
 	Team *teamPostgres
 }
 
-func NewRepository() *Repository {
+func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		Team: newTeamPostgres(),
+		Team: newTeamPostgres(db),
 	}
 }
