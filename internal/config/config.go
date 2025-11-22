@@ -11,7 +11,6 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	const pth = "config.LoadConfig"
 	dbUrl := getEnv("POSTGRES_URL", "")
 	if dbUrl == "" {
 		return nil, fmt.Errorf("POSTGRES_URL is not set in .env")

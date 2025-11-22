@@ -21,7 +21,6 @@ type pullRequestService struct {
 }
 
 func newPullRequestService(trManager *manager.Manager, pullRequestRepo pullRequestRepository, teamRepo teamRepository, userRepo userRepository) *pullRequestService {
-	rand.Seed(time.Now().UTC().UnixNano())
 	return &pullRequestService{
 		pullRequestRepo: pullRequestRepo,
 		teamRepo:        teamRepo,
@@ -51,7 +50,7 @@ func (s *pullRequestService) CreatePullRequest(ctx context.Context, pr model.Pul
 
 		var members []model.User
 		for _, u := range team.Members {
-			if u.ID != pr.AuthorID && u.IsActive != nil && *u.IsActive == true {
+			if u.ID != pr.AuthorID && u.IsActive != nil && *u.IsActive {
 				members = append(members, u)
 			}
 		}
@@ -122,7 +121,7 @@ func (s *pullRequestService) Merge(ctx context.Context, prID string) (model.Pull
 		return nil
 	})
 	if err != nil {
-		return model.PullRequest{}, err
+		return model.PullRequest{}, fmt.Errorf("%s: %w", pth, err)
 	}
 	return pr, nil
 }
@@ -172,7 +171,7 @@ func (s *pullRequestService) Reassign(ctx context.Context, prID, oldReviewerID s
 
 		var members []model.User
 		for _, u := range team.Members {
-			if u.ID != oldReviewerID && u.IsActive != nil && *u.IsActive == true && u.ID != pr.AuthorID && (secReviewer == "" || u.ID != secReviewer) {
+			if u.ID != oldReviewerID && u.IsActive != nil && *u.IsActive && u.ID != pr.AuthorID && (secReviewer == "" || u.ID != secReviewer) {
 				members = append(members, u)
 			}
 		}
@@ -182,7 +181,7 @@ func (s *pullRequestService) Reassign(ctx context.Context, prID, oldReviewerID s
 		}
 
 		if len(members) != 0 {
-			newReviewer := randomUsers(members, 1)[0]
+			newReviewer = randomUsers(members, 1)[0]
 			if err := s.pullRequestRepo.AssignReviewer(ctx, prID, newReviewer.ID); err != nil {
 				return fmt.Errorf("assigning new reviewer: %w", err)
 			}
@@ -196,7 +195,7 @@ func (s *pullRequestService) Reassign(ctx context.Context, prID, oldReviewerID s
 		return nil
 	})
 	if err != nil {
-		return model.PullRequest{}, "", err
+		return model.PullRequest{}, "", fmt.Errorf("%s: %w", pth, err)
 	}
 	return pr, newReviewer.ID, nil
 }

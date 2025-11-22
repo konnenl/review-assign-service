@@ -33,7 +33,11 @@ func main() {
 	lgr.Info("config loaded", "cfg", cfg)
 
 	db, err := postgres.OpenDB(cfg.DBUrl)
-	defer db.Close()
+	defer func(){
+		if err := db.Close(); err != nil{
+        	lgr.Error("failed to close database", "error", err)
+		}
+	}()
 	if err != nil {
 		lgr.Error("failed to connect database", "error", err)
 		os.Exit(1)
@@ -61,7 +65,7 @@ func main() {
 	lgr.Info("starting server ...")
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			lgr.Error("listen: %s\\n", err)
+			lgr.Error("listen", "error", err)
 			os.Exit(1)
 		}
 	}()
@@ -74,12 +78,10 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		lgr.Error("server shutdown:", err)
+		lgr.Error("server shutdown:", "error", err)
 		os.Exit(1)
 	}
-	select {
-	case <-ctx.Done():
-		lgr.Info("timeout of 5 seconds.")
-	}
+	<-ctx.Done()
+	lgr.Info("timeout of 5 seconds.")
 	lgr.Info("server exiting")
 }
