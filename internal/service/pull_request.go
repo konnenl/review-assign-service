@@ -49,7 +49,7 @@ func (s *pullRequestService) CreatePullRequest(ctx context.Context, pr model.Pul
 
 		var members []model.User
 		for _, u := range team.Members {
-			if u.ID != pr.AuthorID {
+			if u.ID != pr.AuthorID && u.IsActive == true{
 				members = append(members, u)
 			}
 		}
