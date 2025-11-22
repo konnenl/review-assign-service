@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http" 
-	
+
 	"github.com/go-chi/chi/v5"
 
 	"github.com/konnen/review-assign-service/internal/dto"
@@ -14,12 +14,14 @@ import (
 type Handler struct {
 	lgr  *slog.Logger
 	team *teamHandler
+	user *userHandler
 }
 
-func NewHandler(lgr *slog.Logger, validator *validator.CustomValidator, teamService teamService) *Handler {
+func NewHandler(lgr *slog.Logger, validator *validator.CustomValidator, teamService teamService, userService userService) *Handler {
 	return &Handler{
 		lgr:  lgr,
 		team: newTeamHandler(lgr, validator, teamService),
+		user: newUserHandler(lgr, validator, userService),
 	}
 }
 
@@ -27,6 +29,9 @@ func (h *Handler) InitRoutes(r *chi.Mux) *chi.Mux {
 	r.Route("/team", func(r chi.Router) {
 		r.Post("/add", h.team.addTeam)
 		r.Get("/get", h.team.getTeam)
+	})
+	r.Route("/users", func(r chi.Router) {
+		r.Post("/setIsActive", h.user.setIsActive)
 	})
 	return r
 }

@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	
+
 	"github.com/konnen/review-assign-service/internal/dto"
 	"github.com/konnen/review-assign-service/internal/errs"
 	"github.com/konnen/review-assign-service/internal/model"
 	"github.com/konnen/review-assign-service/internal/validator"
+	"github.com/konnen/review-assign-service/internal/mapper"
 )
 
 type teamService interface {
@@ -36,8 +37,8 @@ func newTeamHandler(lgr *slog.Logger, validator *validator.CustomValidator, team
 // POST /team/add
 func (h *teamHandler) addTeam(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.team.addTeam"
-	var team model.Team
-	if err := json.NewDecoder(r.Body).Decode(&team); err != nil {
+	var teamDTO dto.TeamDTO
+	if err := json.NewDecoder(r.Body).Decode(&teamDTO); err != nil {
 		resp := dto.ErrorResp{}
 		resp.Error.Code = dto.CodeValidationError
 		resp.Error.Message = dto.MsgValidationError
@@ -45,7 +46,7 @@ func (h *teamHandler) addTeam(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.validator.Validate(&team); err != nil {
+	if err := h.validator.Validate(&teamDTO); err != nil {
 		resp := dto.ErrorResp{}
 		resp.Error.Code = dto.CodeValidationError
 		resp.Error.Message = dto.MsgValidationError
@@ -53,7 +54,8 @@ func (h *teamHandler) addTeam(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.teamService.AddTeamWithMembers(r.Context(), team); err != nil {
+	teamModel := mapper.TeamtoModel(teamDTO)
+	if err := h.teamService.AddTeamWithMembers(r.Context(), teamModel); err != nil {
 		resp := dto.ErrorResp{}
 		if errors.Is(err, errs.ErrTeamExists) {
 			resp.Error.Code = dto.CodeTeamExists
@@ -67,9 +69,8 @@ func (h *teamHandler) addTeam(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	resp := dto.TeamResp{Team: team}
+	resp := dto.TeamResp{Team: teamDTO}
 	_ = json.NewEncoder(w).Encode(resp)
-
 }
 
 // GET /team/get?team_name=...
@@ -81,8 +82,9 @@ func (h *teamHandler) getTeam(w http.ResponseWriter, r *http.Request) {
 		resp.Error.Code = dto.CodeValidationError
 		resp.Error.Message = dto.MsgInvalidQueryError
 		respondWithError(w, http.StatusBadRequest, pth, fmt.Errorf("%s: missing team_name", pth), resp, h.lgr)
+		return
 	}
-	team, err := h.teamService.GetTeamWithMembers(r.Context(), teamName)
+	teamModel, err := h.teamService.GetTeamWithMembers(r.Context(), teamName)
 	if err != nil {
 		resp := dto.ErrorResp{}
 		if errors.Is(err, errs.ErrTeamNotFound) {
@@ -95,7 +97,8 @@ func (h *teamHandler) getTeam(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, pth, err, resp, h.lgr)
 		return
 	}
+	teamDTO := mapper.TeamToDTO(teamModel)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(team)
+	_ = json.NewEncoder(w).Encode(teamDTO)
 }

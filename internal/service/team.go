@@ -3,24 +3,12 @@ package service
 import (
 	"context"
 	"fmt"
-	
+
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 
 	"github.com/konnen/review-assign-service/internal/errs"
 	"github.com/konnen/review-assign-service/internal/model"
 )
-
-type teamRepository interface {
-	AddTeam(ctx context.Context, team model.Team) error
-	AddMember(ctx context.Context, teamName string, member model.User) error
-	IsTeamExists(ctx context.Context, name string) (bool, error)
-	GetTeamWithMembers(ctx context.Context, teamName string) (model.Team, error)
-}
-
-type userRepository interface {
-	AddUser(ctx context.Context, user model.User) error
-	IsExistUser(ctx context.Context, id string) (bool, error)
-}
 
 type teamService struct {
 	teamRepo  teamRepository
@@ -62,7 +50,7 @@ func (s *teamService) AddTeamWithMembers(ctx context.Context, team model.Team) e
 				}
 			}
 
-			if err := s.teamRepo.AddMember(ctx, team.Name, member); err != nil {
+			if err := s.teamRepo.AssignUserToTeam(ctx, member, team.Name); err != nil {
 				return fmt.Errorf("%s: adding member to team: %w", pth, err)
 			}
 		}
