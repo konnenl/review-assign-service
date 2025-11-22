@@ -32,6 +32,7 @@ func (h *Handler) InitRoutes(r *chi.Mux) *chi.Mux {
 	})
 	r.Route("/users", func(r chi.Router) {
 		r.Post("/setIsActive", h.user.setIsActive)
+		r.Get("/getReview", h.user.getReview)
 	})
 	return r
 }

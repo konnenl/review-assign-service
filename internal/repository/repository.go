@@ -8,6 +8,7 @@ import (
 type Repository struct {
 	Team *teamPostgres
 	User *userPostgres
+	PullRequest *pullRequestPostgres
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -15,5 +16,6 @@ func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Team: newTeamPostgres(db, sq),
 		User: newUserPostgres(db, sq),
+		PullRequest: newPullRequestPostgres(db, sq),
 	}
 }

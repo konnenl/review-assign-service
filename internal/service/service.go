@@ -13,10 +13,10 @@ type Service struct {
 	User *userService
 }
 
-func NewService(trManager *manager.Manager, teamRepo teamRepository, userRepo userRepository) *Service {
+func NewService(trManager *manager.Manager, teamRepo teamRepository, userRepo userRepository, pullRequestRepo pullRequestRepository) *Service {
 	return &Service{
 		Team: newTeamService(trManager, teamRepo, userRepo),
-		User: newUserService(trManager, teamRepo, userRepo),
+		User: newUserService(trManager, teamRepo, userRepo, pullRequestRepo),
 	}
 }
 
@@ -31,4 +31,8 @@ type userRepository interface {
 	AddUser(ctx context.Context, user model.User) error
 	IsExistUser(ctx context.Context, id string) (bool, error)
 	SetISActive(ctx context.Context, userID string, isActive bool) (model.User, error)
+}
+
+type pullRequestRepository interface{
+	GetReviews(ctx context.Context, userID string) ([]model.PullRequest, error)
 }

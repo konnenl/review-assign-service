@@ -47,3 +47,19 @@ func TeamtoModel(team dto.TeamDTO) model.Team {
 		Members: members,
 	}
 }
+
+func PRtoUserReview(userID string, pullRequests []model.PullRequest) dto.UserReview{
+	prs := make([]dto.PullRequestShort, len(pullRequests))
+	for i, pr := range pullRequests {
+		prs[i] = dto.PullRequestShort{
+			ID: pr.ID,
+			Name: pr.Name, 
+			AuthorID: pr.AuthorID,
+			Status: string(pr.Status),
+		}
+	}
+	return dto.UserReview{
+		ID: userID,
+		PullRequests: prs,
+	}
+}

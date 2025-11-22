@@ -42,7 +42,7 @@ func main() {
 	trManager := manager.Must(trmsqlx.NewDefaultFactory(db))
 	v := validator.NewValidator()
 	r := repository.NewRepository(db)
-	s := service.NewService(trManager, r.Team, r.User)
+	s := service.NewService(trManager, r.Team, r.User, r.PullRequest)
 	h := handler.NewHandler(lgr, v, s.Team, s.User)
 
 	router := chi.NewRouter()

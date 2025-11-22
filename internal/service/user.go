@@ -14,13 +14,15 @@ import (
 type userService struct {
 	teamRepo  teamRepository
 	userRepo  userRepository
+	pullRequestRepo  pullRequestRepository
 	trManager *manager.Manager
 }
 
-func newUserService(trManager *manager.Manager, teamRepo teamRepository, userRepo userRepository) *userService {
+func newUserService(trManager *manager.Manager, teamRepo teamRepository, userRepo userRepository, pullRequestRepo  pullRequestRepository) *userService {
 	return &userService{
 		teamRepo:  teamRepo,
 		userRepo:  userRepo,
+		pullRequestRepo: pullRequestRepo,
 		trManager: trManager,
 	}
 }
@@ -35,4 +37,13 @@ func (s *userService) SetIsActive(ctx context.Context, userID string, isActive b
 		return model.User{}, fmt.Errorf("%s: setting user is_active: %w", pth, err)
 	}
 	return user, nil
+}
+
+func (s *userService) GetReview(ctx context.Context, userID string) ([]model.PullRequest, error){
+	const pth = "service.user.GetReview"
+	prs, err := s.pullRequestRepo.GetReviews(ctx, userID)
+	if err != nil{
+		return nil, fmt.Errorf("%s: getting users reviews: %w", pth, err)
+	}
+	return prs, nil
 }

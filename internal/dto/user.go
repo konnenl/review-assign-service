@@ -1,17 +1,12 @@
 package dto
 
+type SetIsActiveReq struct{
+	UserID string `json:"user_id"`
+	IsActive bool `json:"is_active"`
+}
+
 type UserResp struct {
 	User UserWithTeamDTO `json:"user"`
-}
-
-type TeamResp struct {
-	Team TeamDTO `json:"team"`
-}
-
-//TODO move from responce.go
-type TeamDTO struct {
-	Name    string    `json:"team_name"`
-	Members []UserDTO `json:"members"`
 }
 
 type UserDTO struct{
@@ -25,4 +20,9 @@ type UserWithTeamDTO struct {
 	Name     string `json:"username"`
 	TeamName string `json:"team_name"`
 	IsActive *bool  `json:"is_active"`
+}
+
+type UserReview struct{
+	ID       string `json:"user_id" validate:"required"`
+	PullRequests []PullRequestShort `json:"pull_requests"`
 }
