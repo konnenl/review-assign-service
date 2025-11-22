@@ -60,11 +60,12 @@ func (h *teamHandler) addTeam(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, errs.ErrTeamExists) {
 			resp.Error.Code = dto.CodeTeamExists
 			resp.Error.Message = dto.MsgValidationError
+			respondWithError(w, http.StatusBadRequest, pth, err, resp, h.lgr)
 		} else {
 			resp.Error.Code = dto.CodeInternalError
 			resp.Error.Message = dto.MsgInternalError
+			respondWithError(w, http.StatusInternalServerError, pth, err, resp, h.lgr)
 		}
-		respondWithError(w, http.StatusBadRequest, pth, err, resp, h.lgr)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -90,11 +91,12 @@ func (h *teamHandler) getTeam(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, errs.ErrTeamNotFound) {
 			resp.Error.Code = dto.CodeNotFound
 			resp.Error.Message = dto.MsgNotFound
+			respondWithError(w, http.StatusNotFound, pth, err, resp, h.lgr)
 		} else {
 			resp.Error.Code = dto.CodeInternalError
 			resp.Error.Message = dto.MsgInternalError
+			respondWithError(w, http.StatusInternalServerError, pth, err, resp, h.lgr)
 		}
-		respondWithError(w, http.StatusBadRequest, pth, err, resp, h.lgr)
 		return
 	}
 	teamDTO := mapper.TeamToDTO(teamModel)
