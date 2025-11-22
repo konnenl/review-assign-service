@@ -1,8 +1,8 @@
 package postgres
 
 import (
-	"github.com/jmoiron/sqlx"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jmoiron/sqlx"
 )
 
 func OpenDB(dbUrl string) (*sqlx.DB, error) {

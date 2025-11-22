@@ -2,10 +2,12 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"database/sql"
-	"github.com/jmoiron/sqlx"
+	"errors"
+	
 	"github.com/Masterminds/squirrel"
+	"github.com/jmoiron/sqlx"
+
 	"github.com/konnen/review-assign-service/internal/model"
 )
 

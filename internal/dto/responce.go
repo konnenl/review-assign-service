@@ -1,6 +1,6 @@
 package dto
 
-import(
+import (
 	"github.com/konnen/review-assign-service/internal/model"
 )
 

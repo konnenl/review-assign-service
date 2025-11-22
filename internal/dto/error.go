@@ -15,15 +15,15 @@ const (
 	CodeNoCandidate     = "NO_CANDIDATE"
 	CodeNotFound        = "NOT_FOUND"
 	CodeValidationError = "VALIDATION_ERROR"
-	CodeInternalError = "INTERNAL_ERROR"
+	CodeInternalError   = "INTERNAL_ERROR"
 )
 
 const (
-	MsgTeamExists      = "team_name already exists"
-	MsgPRExists        = "PR id already exists"
-	MsgPRMerged        = "cannot reassign on merged PR"
-	MsgNotFound        = "resource not found"
-	MsgValidationError = "invalid request body"
+	MsgTeamExists        = "team_name already exists"
+	MsgPRExists          = "PR id already exists"
+	MsgPRMerged          = "cannot reassign on merged PR"
+	MsgNotFound          = "resource not found"
+	MsgValidationError   = "invalid request body"
 	MsgInvalidQueryError = "invalid request query"
-	MsgInternalError = "internal error"
+	MsgInternalError     = "internal error"
 )

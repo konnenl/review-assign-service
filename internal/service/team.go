@@ -3,9 +3,11 @@ package service
 import (
 	"context"
 	"fmt"
+	
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
-	"github.com/konnen/review-assign-service/internal/model"
+
 	"github.com/konnen/review-assign-service/internal/errs"
+	"github.com/konnen/review-assign-service/internal/model"
 )
 
 type teamRepository interface {
@@ -73,8 +75,7 @@ func (s *teamService) AddTeamWithMembers(ctx context.Context, team model.Team) e
 	return nil
 }
 
-
-func (s *teamService) GetTeamWithMembers(ctx context.Context, teamName string) (model.Team, error){
+func (s *teamService) GetTeamWithMembers(ctx context.Context, teamName string) (model.Team, error) {
 	const pth = "service.team.GetTeamWithMembers"
 	var team model.Team
 	err := s.trManager.Do(ctx, func(ctx context.Context) error {
@@ -86,7 +87,7 @@ func (s *teamService) GetTeamWithMembers(ctx context.Context, teamName string) (
 			return errs.ErrTeamNotFound
 		}
 		team, err = s.teamRepo.GetTeamWithMembers(ctx, teamName)
-		if err != nil{
+		if err != nil {
 			return fmt.Errorf("getting team with members: %w", err)
 		}
 		return nil

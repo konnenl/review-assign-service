@@ -1,17 +1,19 @@
 package main
 
 import (
-	"os"
-	"time"
 	"context"
 	"log/slog"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"time"
+
 	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+
 	"github.com/konnen/review-assign-service/internal/config"
 	"github.com/konnen/review-assign-service/internal/database/postgres"
 	"github.com/konnen/review-assign-service/internal/handler"

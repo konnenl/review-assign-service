@@ -2,10 +2,12 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"database/sql"
-	"github.com/jmoiron/sqlx"
+	"errors"
+	
 	"github.com/Masterminds/squirrel"
+	"github.com/jmoiron/sqlx"
+
 	"github.com/konnen/review-assign-service/internal/model"
 )
 
@@ -56,8 +58,7 @@ func (r *teamPostgres) IsTeamExists(ctx context.Context, name string) (bool, err
 	return true, nil
 }
 
-
-func (r *teamPostgres) GetTeamWithMembers(ctx context.Context, teamName string) (model.Team, error){
+func (r *teamPostgres) GetTeamWithMembers(ctx context.Context, teamName string) (model.Team, error) {
 	var members []model.User
 	query, args, _ := r.sq.Select("u.id", "u.name", "u.is_active").
 		From("users_teams ut").

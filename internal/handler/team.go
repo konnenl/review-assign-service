@@ -1,16 +1,17 @@
 package handler
 
 import (
-	"fmt"
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/konnen/review-assign-service/internal/dto"
-	"github.com/konnen/review-assign-service/internal/model"
-	"github.com/konnen/review-assign-service/internal/errs"
-	"github.com/konnen/review-assign-service/internal/validator"
+	"fmt"
 	"log/slog"
 	"net/http"
+	
+	"github.com/konnen/review-assign-service/internal/dto"
+	"github.com/konnen/review-assign-service/internal/errs"
+	"github.com/konnen/review-assign-service/internal/model"
+	"github.com/konnen/review-assign-service/internal/validator"
 )
 
 type teamService interface {
@@ -57,7 +58,7 @@ func (h *teamHandler) addTeam(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, errs.ErrTeamExists) {
 			resp.Error.Code = dto.CodeTeamExists
 			resp.Error.Message = dto.MsgValidationError
-		}else{
+		} else {
 			resp.Error.Code = dto.CodeInternalError
 			resp.Error.Message = dto.MsgInternalError
 		}
@@ -71,23 +72,23 @@ func (h *teamHandler) addTeam(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//GET /team/get?team_name=...
+// GET /team/get?team_name=...
 func (h *teamHandler) getTeam(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.team.getTeam"
 	teamName := r.URL.Query().Get("team_name")
-	if teamName == ""{
+	if teamName == "" {
 		resp := dto.ErrorResp{}
 		resp.Error.Code = dto.CodeValidationError
 		resp.Error.Message = dto.MsgInvalidQueryError
 		respondWithError(w, http.StatusBadRequest, pth, fmt.Errorf("%s: missing team_name", pth), resp, h.lgr)
 	}
 	team, err := h.teamService.GetTeamWithMembers(r.Context(), teamName)
-	if err != nil{
+	if err != nil {
 		resp := dto.ErrorResp{}
 		if errors.Is(err, errs.ErrTeamNotFound) {
 			resp.Error.Code = dto.CodeNotFound
 			resp.Error.Message = dto.MsgNotFound
-		}else{
+		} else {
 			resp.Error.Code = dto.CodeInternalError
 			resp.Error.Message = dto.MsgInternalError
 		}

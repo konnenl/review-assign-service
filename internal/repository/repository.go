@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"github.com/jmoiron/sqlx"
 	"github.com/Masterminds/squirrel"
+	"github.com/jmoiron/sqlx"
 )
 
 type Repository struct {
