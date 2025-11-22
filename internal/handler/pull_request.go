@@ -9,8 +9,8 @@ import (
 	"github.com/konnen/review-assign-service/internal/dto"
 	"github.com/konnen/review-assign-service/internal/errs"
 	"github.com/konnen/review-assign-service/internal/mapper"
-	"github.com/konnen/review-assign-service/internal/validator"
 	"github.com/konnen/review-assign-service/internal/model"
+	"github.com/konnen/review-assign-service/internal/validator"
 )
 
 type pullRequestHandler struct {
@@ -27,6 +27,7 @@ func newPullRequestHandler(lgr *slog.Logger, validator *validator.CustomValidato
 	}
 }
 
+// POST /pullRequest/create
 func (h *pullRequestHandler) createPullRequest(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.pullRequest.createPullRequest"
 	var prDTO dto.PullRequestShort
@@ -67,6 +68,7 @@ func (h *pullRequestHandler) createPullRequest(w http.ResponseWriter, r *http.Re
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
+// POST /pullRequest/merge
 func (h *pullRequestHandler) merge(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.pullRequest.merge"
 	var mergeDTO dto.Merge
@@ -101,6 +103,7 @@ func (h *pullRequestHandler) merge(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
+// POST /pullRequest/reassign
 func (h *pullRequestHandler) reassign(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.pullRequest.reassign"
 	var reassignDTO dto.Reassign

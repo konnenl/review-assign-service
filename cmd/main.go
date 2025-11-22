@@ -33,9 +33,9 @@ func main() {
 	lgr.Info("config loaded", "cfg", cfg)
 
 	db, err := postgres.OpenDB(cfg.DBUrl)
-	defer func(){
-		if err := db.Close(); err != nil{
-        	lgr.Error("failed to close database", "error", err)
+	defer func() {
+		if err := db.Close(); err != nil {
+			lgr.Error("failed to close database", "error", err)
 		}
 	}()
 	if err != nil {

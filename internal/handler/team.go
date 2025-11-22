@@ -61,7 +61,7 @@ func (h *teamHandler) addTeam(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
-// GET /team/get?team_name=...
+// GET /team/get
 func (h *teamHandler) getTeam(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.team.getTeam"
 	teamName := r.URL.Query().Get("team_name")

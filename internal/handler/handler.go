@@ -1,16 +1,16 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"context"
 
 	"github.com/go-chi/chi/v5"
 
 	"github.com/konnen/review-assign-service/internal/dto"
-	"github.com/konnen/review-assign-service/internal/validator"
 	"github.com/konnen/review-assign-service/internal/model"
+	"github.com/konnen/review-assign-service/internal/validator"
 )
 
 type Handler struct {

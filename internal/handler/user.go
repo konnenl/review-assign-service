@@ -27,6 +27,7 @@ func newUserHandler(lgr *slog.Logger, validator *validator.CustomValidator, user
 	}
 }
 
+// POST /users/setIsActive
 func (h *userHandler) setIsActive(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.user.setIsActive"
 	var isActiveReq dto.SetIsActiveReq
@@ -60,6 +61,7 @@ func (h *userHandler) setIsActive(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
+// GET /users/getReview
 func (h *userHandler) getReview(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.user.getReview"
 	userID := r.URL.Query().Get("user_id")
