@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"github.com/jmoiron/sqlx"
 	"github.com/Masterminds/squirrel"
-	"github.com/konnen/review-assign-service/internal/dto"
+	"github.com/konnen/review-assign-service/internal/model"
 )
 
 type teamPostgres struct {
@@ -21,7 +21,7 @@ func newTeamPostgres(db *sqlx.DB, sq squirrel.StatementBuilderType) *teamPostgre
 	}
 }
 
-func (r *teamPostgres) AddTeam(ctx context.Context, team dto.Team) error {
+func (r *teamPostgres) AddTeam(ctx context.Context, team model.Team) error {
 	query, args, _ := r.sq.Insert("teams").
 		Columns("name").
 		Values(team.Name).
@@ -30,7 +30,7 @@ func (r *teamPostgres) AddTeam(ctx context.Context, team dto.Team) error {
 	return err
 }
 
-func (r *teamPostgres) AddMember(ctx context.Context, teamName string, member dto.User) error {
+func (r *teamPostgres) AddMember(ctx context.Context, teamName string, member model.User) error {
 	query, args, _ := r.sq.Insert("users_teams").
 		Columns("user_id", "team_name").
 		Values(member.ID, teamName).
@@ -54,4 +54,30 @@ func (r *teamPostgres) IsTeamExists(ctx context.Context, name string) (bool, err
 		return false, err
 	}
 	return true, nil
+}
+
+
+func (r *teamPostgres) GetTeamWithMembers(ctx context.Context, teamName string) (model.Team, error){
+	var members []model.User
+	query, args, _ := r.sq.Select("u.id", "u.name", "u.is_active").
+		From("users_teams ut").
+		Join("users u ON u.id = ut.user_id").
+		Where(squirrel.Eq{"ut.team_name": teamName}).
+		ToSql()
+
+	if err := r.db.SelectContext(ctx, &members, query, args...); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return model.Team{
+				Name:    teamName,
+				Members: []model.User{},
+			}, nil
+		}
+		return model.Team{}, err
+	}
+
+	team := model.Team{
+		Name:    teamName,
+		Members: members,
+	}
+	return team, nil
 }

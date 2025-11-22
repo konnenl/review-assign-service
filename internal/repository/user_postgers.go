@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"github.com/jmoiron/sqlx"
 	"github.com/Masterminds/squirrel"
-	"github.com/konnen/review-assign-service/internal/dto"
+	"github.com/konnen/review-assign-service/internal/model"
 )
 
 type userPostgres struct {
@@ -21,7 +21,7 @@ func newUserPostgres(db *sqlx.DB, sq squirrel.StatementBuilderType) *userPostgre
 	}
 }
 
-func (r *userPostgres) AddUser(ctx context.Context, user dto.User) error {
+func (r *userPostgres) AddUser(ctx context.Context, user model.User) error {
 	query, args, _ := r.sq.Insert("users").
 		Columns("id", "name", "is_active").
 		Values(user.ID, user.Name, user.IsActive).

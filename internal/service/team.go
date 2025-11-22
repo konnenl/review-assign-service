@@ -4,18 +4,19 @@ import (
 	"context"
 	"fmt"
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
-	"github.com/konnen/review-assign-service/internal/dto"
+	"github.com/konnen/review-assign-service/internal/model"
 	"github.com/konnen/review-assign-service/internal/errs"
 )
 
 type teamRepository interface {
-	AddTeam(ctx context.Context, team dto.Team) error
-	AddMember(ctx context.Context, teamName string, member dto.User) error
+	AddTeam(ctx context.Context, team model.Team) error
+	AddMember(ctx context.Context, teamName string, member model.User) error
 	IsTeamExists(ctx context.Context, name string) (bool, error)
+	GetTeamWithMembers(ctx context.Context, teamName string) (model.Team, error)
 }
 
 type userRepository interface {
-	AddUser(ctx context.Context, user dto.User) error
+	AddUser(ctx context.Context, user model.User) error
 	IsExistUser(ctx context.Context, id string) (bool, error)
 }
 
@@ -33,7 +34,7 @@ func newTeamService(trManager *manager.Manager, teamRepo teamRepository, userRep
 	}
 }
 
-func (s *teamService) AddTeamWithMembers(ctx context.Context, team dto.Team) error {
+func (s *teamService) AddTeamWithMembers(ctx context.Context, team model.Team) error {
 	const pth = "service.team.AddTeamWithMembers"
 	err := s.trManager.Do(ctx, func(ctx context.Context) error {
 		exists, err := s.teamRepo.IsTeamExists(ctx, team.Name)
@@ -70,4 +71,28 @@ func (s *teamService) AddTeamWithMembers(ctx context.Context, team dto.Team) err
 		return fmt.Errorf("%s: %w", pth, err)
 	}
 	return nil
+}
+
+
+func (s *teamService) GetTeamWithMembers(ctx context.Context, teamName string) (model.Team, error){
+	const pth = "service.team.GetTeamWithMembers"
+	var team model.Team
+	err := s.trManager.Do(ctx, func(ctx context.Context) error {
+		exists, err := s.teamRepo.IsTeamExists(ctx, teamName)
+		if err != nil {
+			return fmt.Errorf("checking team existence: %w", err)
+		}
+		if !exists {
+			return errs.ErrTeamNotFound
+		}
+		team, err = s.teamRepo.GetTeamWithMembers(ctx, teamName)
+		if err != nil{
+			return fmt.Errorf("getting team with members: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return team, fmt.Errorf("%s: %w", pth, err)
+	}
+	return team, nil
 }
