@@ -15,11 +15,6 @@ import (
 	"github.com/konnen/review-assign-service/internal/validator"
 )
 
-type teamService interface {
-	AddTeamWithMembers(ctx context.Context, team model.Team) error
-	GetTeamWithMembers(ctx context.Context, teamName string) (model.Team, error)
-}
-
 type teamHandler struct {
 	lgr         *slog.Logger
 	validator   *validator.CustomValidator
@@ -39,18 +34,12 @@ func (h *teamHandler) addTeam(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.team.addTeam"
 	var teamDTO dto.TeamDTO
 	if err := json.NewDecoder(r.Body).Decode(&teamDTO); err != nil {
-		resp := dto.ErrorResp{}
-		resp.Error.Code = dto.CodeValidationError
-		resp.Error.Message = dto.MsgValidationError
-		respondWithError(w, http.StatusBadRequest, pth, err, resp, h.lgr)
+		respondWithValidationError(w, pth, err, h.lgr)
 		return
 	}
 
 	if err := h.validator.Validate(&teamDTO); err != nil {
-		resp := dto.ErrorResp{}
-		resp.Error.Code = dto.CodeValidationError
-		resp.Error.Message = dto.MsgValidationError
-		respondWithError(w, http.StatusBadRequest, pth, validator.GetValidationErrors(err), resp, h.lgr)
+		respondWithValidationError(w, pth, validator.GetValidationErrors(err), h.lgr)
 		return
 	}
 
@@ -79,10 +68,7 @@ func (h *teamHandler) getTeam(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.team.getTeam"
 	teamName := r.URL.Query().Get("team_name")
 	if teamName == "" {
-		resp := dto.ErrorResp{}
-		resp.Error.Code = dto.CodeValidationError
-		resp.Error.Message = dto.MsgInvalidQueryError
-		respondWithError(w, http.StatusBadRequest, pth, fmt.Errorf("%s: missing team_name", pth), resp, h.lgr)
+		respondWithValidationError(w, pth, fmt.Errorf("%s: missing team_name", pth), h.lgr)
 		return
 	}
 	teamModel, err := h.teamService.GetTeamWithMembers(r.Context(), teamName)

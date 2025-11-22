@@ -18,6 +18,22 @@ type Handler struct {
 	pullRequest *pullRequestHandler
 }
 
+type teamService interface {
+	AddTeamWithMembers(ctx context.Context, team model.Team) error
+	GetTeamWithMembers(ctx context.Context, teamName string) (model.Team, error)
+}
+
+type userService interface {
+	SetIsActive(ctx context.Context, userID string, isActive bool) (model.User, error)
+	GetReview(ctx context.Context, userID string) ([]model.PullRequest, error)
+}
+
+type pullRequestService interface {
+	CreatePullRequest(ctx context.Context, pr model.PullRequest) (model.PullRequest, error)
+	Merge(ctx context.Context, prID string) (model.PullRequest, error)
+	Reassign(ctx context.Context, pullRequeprID, oldReviewerID string) (model.PullRequest, string, error)
+}
+
 func NewHandler(lgr *slog.Logger, validator *validator.CustomValidator, teamService teamService, userService userService, pullRequestService pullRequestService) *Handler {
 	return &Handler{
 		lgr:         lgr,
@@ -49,6 +65,18 @@ func respondWithError(w http.ResponseWriter, statusCode int, pth string, err err
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
+
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func respondWithValidationError(w http.ResponseWriter, pth string, err error, lgr *slog.Logger) {
+	resp := dto.ErrorResp{}
+	resp.Error.Code = dto.CodeValidationError
+	resp.Error.Message = dto.MsgValidationError
+	lgr.Error(err.Error(), "handler", pth)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
 
 	_ = json.NewEncoder(w).Encode(resp)
 }

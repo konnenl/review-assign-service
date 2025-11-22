@@ -15,11 +15,6 @@ import (
 	"github.com/konnen/review-assign-service/internal/validator"
 )
 
-type userService interface {
-	SetIsActive(ctx context.Context, userID string, isActive bool) (model.User, error)
-	GetReview(ctx context.Context, userID string) ([]model.PullRequest, error)
-}
-
 type userHandler struct {
 	lgr         *slog.Logger
 	validator   *validator.CustomValidator
@@ -38,19 +33,12 @@ func (h *userHandler) setIsActive(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.user.setIsActive"
 	var isActiveReq dto.SetIsActiveReq
 	if err := json.NewDecoder(r.Body).Decode(&isActiveReq); err != nil {
-		//TODO respondWithValidationError
-		resp := dto.ErrorResp{}
-		resp.Error.Code = dto.CodeValidationError
-		resp.Error.Message = dto.MsgValidationError
-		respondWithError(w, http.StatusBadRequest, pth, err, resp, h.lgr)
+		respondWithValidationError(w, pth, err, h.lgr)
 		return
 	}
 
 	if err := h.validator.Validate(&isActiveReq); err != nil {
-		resp := dto.ErrorResp{}
-		resp.Error.Code = dto.CodeValidationError
-		resp.Error.Message = dto.MsgValidationError
-		respondWithError(w, http.StatusBadRequest, pth, validator.GetValidationErrors(err), resp, h.lgr)
+		respondWithValidationError(w, pth, validator.GetValidationErrors(err), h.lgr)
 		return
 	}
 	userModel, err := h.userService.SetIsActive(r.Context(), isActiveReq.UserID, isActiveReq.IsActive)
@@ -78,10 +66,7 @@ func (h *userHandler) getReview(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.user.getReview"
 	userID := r.URL.Query().Get("user_id")
 	if userID == "" {
-		resp := dto.ErrorResp{}
-		resp.Error.Code = dto.CodeValidationError
-		resp.Error.Message = dto.MsgInvalidQueryError
-		respondWithError(w, http.StatusBadRequest, pth, fmt.Errorf("%s: missing user_id", pth), resp, h.lgr)
+		respondWithValidationError(w, pth, fmt.Errorf("%s: missing user_id", pth), h.lgr)
 		return
 	}
 
