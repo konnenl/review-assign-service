@@ -93,6 +93,15 @@ func (r *pullRequestPostgres) AssignReviewer(ctx context.Context, prID, userID s
 	return err
 }
 
+func (r *pullRequestPostgres) UnassignReviewer(ctx context.Context, prID, userID string) error {
+	query, args, _ := r.sq.
+		Delete("reviewers").
+		Where(squirrel.Eq{"pull_request_id": prID, "reviewer_id": userID}).
+		ToSql()
+	_, err := r.db.ExecContext(ctx, query, args...)
+	return err
+}
+
 func (r *pullRequestPostgres) Merge(ctx context.Context, prID string, timeNow time.Time) error{
 	query, args, _ := r.sq.
 		Update("pull_requests").

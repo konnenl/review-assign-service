@@ -19,7 +19,7 @@ func NewService(trManager *manager.Manager, teamRepo teamRepository, userRepo us
 	return &Service{
 		Team:        newTeamService(trManager, teamRepo, userRepo),
 		User:        newUserService(trManager, teamRepo, userRepo, pullRequestRepo),
-		PullRequest: newPullRequestService(trManager, pullRequestRepo, teamRepo),
+		PullRequest: newPullRequestService(trManager, pullRequestRepo, teamRepo, userRepo),
 	}
 }
 
@@ -42,5 +42,6 @@ type pullRequestRepository interface {
 	GetByID(ctx context.Context, id string) (model.PullRequest, error)
 	CreatePullRequest(ctx context.Context, pr model.PullRequest) error
 	AssignReviewer(ctx context.Context, prID, userID string) error
+	UnassignReviewer(ctx context.Context, prID, userID string) error
 	Merge(ctx context.Context, prID string, timeNow time.Time) error
 }

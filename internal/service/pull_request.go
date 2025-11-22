@@ -16,14 +16,16 @@ import (
 type pullRequestService struct {
 	pullRequestRepo pullRequestRepository
 	teamRepo        teamRepository
+	userRepo        userRepository
 	trManager       *manager.Manager
 }
 
-func newPullRequestService(trManager *manager.Manager, pullRequestRepo pullRequestRepository, teamRepo teamRepository) *pullRequestService {
+func newPullRequestService(trManager *manager.Manager, pullRequestRepo pullRequestRepository, teamRepo teamRepository, userRepo userRepository) *pullRequestService {
 	rand.Seed(time.Now().UTC().UnixNano())
 	return &pullRequestService{
 		pullRequestRepo: pullRequestRepo,
 		teamRepo:        teamRepo,
+		userRepo:        userRepo,
 		trManager:       trManager,
 	}
 }
@@ -49,7 +51,7 @@ func (s *pullRequestService) CreatePullRequest(ctx context.Context, pr model.Pul
 
 		var members []model.User
 		for _, u := range team.Members {
-			if u.ID != pr.AuthorID && u.IsActive == true{
+			if u.ID != pr.AuthorID && u.IsActive != nil && *u.IsActive == true {
 				members = append(members, u)
 			}
 		}
@@ -123,4 +125,78 @@ func (s *pullRequestService) Merge(ctx context.Context, prID string) (model.Pull
 		return model.PullRequest{}, err
 	}
 	return pr, nil
+}
+
+func (s *pullRequestService) Reassign(ctx context.Context, prID, oldReviewerID string) (model.PullRequest, string, error){
+	const pth = "service.pullRequest.Reassign"
+	var pr model.PullRequest
+	var newReviewer model.User
+	err := s.trManager.Do(ctx, func(ctx context.Context) error {
+		var err error
+		pr, err = s.pullRequestRepo.GetByID(ctx, prID)
+		if err != nil{
+			if errors.Is(err, errs.ErrPRNotFound){
+				return errs.ErrPRNotFound
+			}
+			return fmt.Errorf("getting PR: %w", err)
+		}
+		exists, err := s.userRepo.IsExistUser(ctx, oldReviewerID)
+		if err != nil{
+			return fmt.Errorf("getting user: %w", err)
+		}
+		if !exists{
+			return errs.ErrUserNotFound
+		}
+
+		if pr.Status == model.StatusMerged{
+			return errs.ErrPRMerged
+		}
+
+		var oldReviewer model.User
+		secReviewer := ""
+		for _, u := range pr.AssignedReviewers {
+			if u.ID == oldReviewerID {
+				oldReviewer = u
+			}else{
+				secReviewer = u.ID
+			}
+		}
+		if oldReviewer.ID == "" {
+			return fmt.Errorf("user %s is not assigned to PR %s", oldReviewerID, prID)
+		}
+
+		team, err := s.teamRepo.GetTeamWithMembers(ctx, oldReviewer.TeamName)
+		if err != nil {
+			return fmt.Errorf("getting team members: %w", err)
+		}
+
+		var members []model.User
+		for _, u := range team.Members {
+			if u.ID != oldReviewerID && u.IsActive != nil && *u.IsActive == true && u.ID != pr.AuthorID && (secReviewer == "" || u.ID != secReviewer){
+				members = append(members, u)
+			}
+		}
+
+		if err := s.pullRequestRepo.UnassignReviewer(ctx, prID, oldReviewerID); err != nil {
+			return fmt.Errorf("unassigning old reviewer: %w", err)
+		}
+
+		if len(members) != 0 {
+			newReviewer := randomUsers(members, 1)[0]
+			if err := s.pullRequestRepo.AssignReviewer(ctx, prID, newReviewer.ID); err != nil {
+				return fmt.Errorf("assigning new reviewer: %w", err)
+			}
+		}
+
+		pr, err = s.pullRequestRepo.GetByID(ctx, prID)
+		if err != nil {
+			return fmt.Errorf("getting PR after reassignment: %w", err)
+		}
+
+		return nil
+	})
+	if err != nil{
+		return model.PullRequest{}, "", err
+	}
+	return pr, newReviewer.ID, nil
 }

@@ -6,6 +6,7 @@ import(
 
 type PullRequestResp struct {
 	PullRequest PullRequest `json:"pr"`
+	ReplacedBy string `json:"replaced_by,omitempty"`
 }
 
 type PullRequestShort struct {
@@ -26,4 +27,9 @@ type PullRequest struct {
 
 type Merge struct{
 	PullRequestID string `json:"pull_request_id" validate:"required"`
+}
+
+type Reassign struct{
+	PullRequestID string `json:"pull_request_id" validate:"required"`
+	OldReviewerID string `json:"old_reviewer_id" validate:"required"`
 }
