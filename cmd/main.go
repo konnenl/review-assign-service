@@ -1,22 +1,24 @@
 package main
 
 import (
+	"os"
+	"time"
 	"context"
+	"log/slog"
+	"net/http"
+	"os/signal"
+	"syscall"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	trmsqlx "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/konnen/review-assign-service/internal/config"
+	"github.com/konnen/review-assign-service/internal/database/postgres"
 	"github.com/konnen/review-assign-service/internal/handler"
 	"github.com/konnen/review-assign-service/internal/middleware/logger"
 	"github.com/konnen/review-assign-service/internal/repository"
 	"github.com/konnen/review-assign-service/internal/service"
-	"github.com/konnen/review-assign-service/internal/database/postgres"
 	"github.com/konnen/review-assign-service/internal/validator"
-	"log/slog"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 func main() {
@@ -29,15 +31,16 @@ func main() {
 	lgr.Info("config loaded", "cfg", cfg)
 
 	db, err := postgres.OpenDB(cfg.DBUrl)
+	defer db.Close()
 	if err != nil {
 		lgr.Error("failed to connect database", "error", err)
 		os.Exit(1)
 	}
 
+	trManager := manager.Must(trmsqlx.NewDefaultFactory(db))
 	v := validator.NewValidator()
-
 	r := repository.NewRepository(db)
-	s := service.NewService(r.Team)
+	s := service.NewService(trManager, r.Team, r.User)
 	h := handler.NewHandler(lgr, v, s.Team)
 
 	router := chi.NewRouter()

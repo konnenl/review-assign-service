@@ -1,10 +1,10 @@
 package dto
 
-type TeamReq struct{
-	Team Team `json:"team" validate:"required"`
+type Team struct {
+	Name    string `json:"team_name" validate:"required"`
+	Members []User `json:"members" validate:"required,min=1,dive"`
 }
 
-type Team struct{
-	TeamName string `json:"team_name" validate:"required"`
-	Members []User `json:"members" validate:"required,min=1,dive"`
+type TeamResp struct {
+	Team Team `json:"team"`
 }

@@ -7,7 +7,7 @@ import (
 
 type Config struct {
 	ServerPort string
-	DBUrl     string
+	DBUrl      string
 }
 
 func LoadConfig() (*Config, error) {
@@ -23,7 +23,7 @@ func LoadConfig() (*Config, error) {
 
 	return &Config{
 		ServerPort: serverPort,
-		DBUrl:     dbUrl,
+		DBUrl:      dbUrl,
 	}, nil
 }
 

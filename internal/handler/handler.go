@@ -1,10 +1,11 @@
 package handler
 
 import (
-	"net/http"
-	"github.com/go-chi/chi/v5"
 	"log/slog"
+	"net/http"
 	"encoding/json"
+	"github.com/go-chi/chi/v5"
+	"github.com/konnen/review-assign-service/internal/dto"
 	"github.com/konnen/review-assign-service/internal/validator"
 )
 
@@ -28,15 +29,11 @@ func (h *Handler) InitRoutes(r *chi.Mux) *chi.Mux {
 	return r
 }
 
-func respondWithError(w http.ResponseWriter, statusCode int, pth string, err error, message string, lgr *slog.Logger) {
+func respondWithError(w http.ResponseWriter, statusCode int, pth string, err error, resp dto.ErrorResp, lgr *slog.Logger) {
 	lgr.Error(err.Error(), "handler", pth)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-
-	resp := map[string]string{
-		"error": message,
-	}
 
 	_ = json.NewEncoder(w).Encode(resp)
 }

@@ -1,10 +1,10 @@
 package validator
 
 import (
-	"github.com/go-playground/validator/v10"
-	"strings"
-	"reflect"
 	"fmt"
+	"github.com/go-playground/validator/v10"
+	"reflect"
+	"strings"
 )
 
 type CustomValidator struct {

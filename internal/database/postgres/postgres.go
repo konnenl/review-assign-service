@@ -1,16 +1,16 @@
-package postgres 
+package postgres
 
-import(
-	"database/sql"
+import (
+	"github.com/jmoiron/sqlx"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func OpenDB(dbUrl string) (*sql.DB, error){
-	db, err := sql.Open("pgx",  dbUrl)
-	if err != nil{
+func OpenDB(dbUrl string) (*sqlx.DB, error) {
+	db, err := sqlx.Connect("pgx", dbUrl)
+	if err != nil {
 		return nil, err
 	}
-	if err = db.Ping(); err != nil{
+	if err = db.Ping(); err != nil {
 		return nil, err
 	}
 
