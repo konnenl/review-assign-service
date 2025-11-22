@@ -1,6 +1,6 @@
 package mapper
 
-import(
+import (
 	"github.com/konnen/review-assign-service/internal/dto"
 	"github.com/konnen/review-assign-service/internal/model"
 )
@@ -29,7 +29,7 @@ func UserToWithTeamDTO(u model.User) dto.UserWithTeamDTO {
 func TeamToDTO(team model.Team) dto.TeamDTO {
 	return dto.TeamDTO{
 		Name:    team.Name,
-		Members: UsersToDTO(team.Members), 
+		Members: UsersToDTO(team.Members),
 	}
 }
 
@@ -48,28 +48,28 @@ func TeamtoModel(team dto.TeamDTO) model.Team {
 	}
 }
 
-func PRtoUserReview(userID string, pullRequests []model.PullRequest) dto.UserReview{
+func PRtoUserReview(userID string, pullRequests []model.PullRequest) dto.UserReview {
 	prs := make([]dto.PullRequestShort, len(pullRequests))
 	for i, pr := range pullRequests {
 		prs[i] = dto.PullRequestShort{
-			ID: pr.ID,
-			Name: pr.Name, 
+			ID:       pr.ID,
+			Name:     pr.Name,
 			AuthorID: pr.AuthorID,
-			Status: string(pr.Status),
+			Status:   string(pr.Status),
 		}
 	}
 	return dto.UserReview{
-		ID: userID,
+		ID:           userID,
 		PullRequests: prs,
 	}
 }
 
 func PRtoModel(prDTO dto.PullRequestShort) model.PullRequest {
 	return model.PullRequest{
-		ID:       prDTO.ID,
-		Name:     prDTO.Name,
-		AuthorID: prDTO.AuthorID,
-		Status:   model.Status(prDTO.Status),
+		ID:                prDTO.ID,
+		Name:              prDTO.Name,
+		AuthorID:          prDTO.AuthorID,
+		Status:            model.Status(prDTO.Status),
 		AssignedReviewers: nil,
 	}
 }

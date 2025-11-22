@@ -8,8 +8,8 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/konnen/review-assign-service/internal/model"
 	"github.com/konnen/review-assign-service/internal/errs"
+	"github.com/konnen/review-assign-service/internal/model"
 )
 
 type teamPostgres struct {

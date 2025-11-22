@@ -8,8 +8,8 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/konnen/review-assign-service/internal/model"
 	"github.com/konnen/review-assign-service/internal/errs"
+	"github.com/konnen/review-assign-service/internal/model"
 )
 
 type userPostgres struct {
@@ -55,8 +55,8 @@ func (r *userPostgres) SetISActive(ctx context.Context, userID string, isActive 
 		Suffix("RETURNING id, name, is_active, team_name").
 		ToSql()
 	err := r.db.GetContext(ctx, &user, query, args...)
-	if err != nil{
-		if errors.Is(err, sql.ErrNoRows){
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
 			return user, errs.ErrUserNotFound
 		}
 		return user, err

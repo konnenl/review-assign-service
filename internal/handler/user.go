@@ -4,15 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
-	"fmt"
-	
+
 	"github.com/konnen/review-assign-service/internal/dto"
 	"github.com/konnen/review-assign-service/internal/errs"
-	"github.com/konnen/review-assign-service/internal/validator"
 	"github.com/konnen/review-assign-service/internal/mapper"
 	"github.com/konnen/review-assign-service/internal/model"
+	"github.com/konnen/review-assign-service/internal/validator"
 )
 
 type userService interface {

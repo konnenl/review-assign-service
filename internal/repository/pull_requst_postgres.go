@@ -1,16 +1,16 @@
 package repository
 
 import (
-	"fmt"
 	"context"
-	"errors"
 	"database/sql"
+	"errors"
+	"fmt"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/konnen/review-assign-service/internal/model"
 	"github.com/konnen/review-assign-service/internal/errs"
+	"github.com/konnen/review-assign-service/internal/model"
 )
 
 type pullRequestPostgres struct {
@@ -25,7 +25,7 @@ func newPullRequestPostgres(db *sqlx.DB, sq squirrel.StatementBuilderType) *pull
 	}
 }
 
-func (r *pullRequestPostgres) GetReviews(ctx context.Context, userID string) ([]model.PullRequest, error){
+func (r *pullRequestPostgres) GetReviews(ctx context.Context, userID string) ([]model.PullRequest, error) {
 	var prs []model.PullRequest
 	query, args, _ := r.sq.
 		Select("p.id", "p.name", "p.author_id", "p.merged_at", "status").
@@ -38,9 +38,9 @@ func (r *pullRequestPostgres) GetReviews(ctx context.Context, userID string) ([]
 	}
 
 	return prs, nil
-} 
+}
 
-func (r *pullRequestPostgres) CreatePullRequest(ctx context.Context, pr model.PullRequest) (error){
+func (r *pullRequestPostgres) CreatePullRequest(ctx context.Context, pr model.PullRequest) error {
 	query, args, _ := r.sq.
 		Insert("pull_requests").
 		Columns("id", "name", "author_id", "status").
@@ -50,7 +50,7 @@ func (r *pullRequestPostgres) CreatePullRequest(ctx context.Context, pr model.Pu
 	return err
 }
 
-func (r *pullRequestPostgres) GetByID(ctx context.Context, id string) (model.PullRequest, error){
+func (r *pullRequestPostgres) GetByID(ctx context.Context, id string) (model.PullRequest, error) {
 	var pr model.PullRequest
 	query, args, _ := r.sq.
 		Select("id", "name", "author_id", "merged_at", "status").
@@ -67,7 +67,7 @@ func (r *pullRequestPostgres) GetByID(ctx context.Context, id string) (model.Pul
 	return pr, nil
 }
 
-func (r *pullRequestPostgres) AssignReviewer(ctx context.Context, prID, userID string) (error){
+func (r *pullRequestPostgres) AssignReviewer(ctx context.Context, prID, userID string) error {
 	query, args, _ := r.sq.
 		Insert("reviewers").
 		Columns("pull_request_id", "reviewer_id").

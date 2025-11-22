@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-	"fmt"
-	"time"
-    "math/rand"
 	"errors"
+	"fmt"
+	"math/rand"
+	"time"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 
@@ -14,33 +14,33 @@ import (
 )
 
 type pullRequestService struct {
-	pullRequestRepo  pullRequestRepository
-	teamRepo  teamRepository
-	trManager *manager.Manager
+	pullRequestRepo pullRequestRepository
+	teamRepo        teamRepository
+	trManager       *manager.Manager
 }
 
 func newPullRequestService(trManager *manager.Manager, pullRequestRepo pullRequestRepository, teamRepo teamRepository) *pullRequestService {
 	rand.Seed(time.Now().UTC().UnixNano())
 	return &pullRequestService{
-		pullRequestRepo:  pullRequestRepo,
-		teamRepo:  teamRepo,
-		trManager: trManager,
+		pullRequestRepo: pullRequestRepo,
+		teamRepo:        teamRepo,
+		trManager:       trManager,
 	}
 }
 
-func (s *pullRequestService) CreatePullRequest(ctx context.Context, pr model.PullRequest) (model.PullRequest, error){
+func (s *pullRequestService) CreatePullRequest(ctx context.Context, pr model.PullRequest) (model.PullRequest, error) {
 	const pth = "service.pullRequest.CreatePullRequest"
 	err := s.trManager.Do(ctx, func(ctx context.Context) error {
 		team, err := s.teamRepo.GetTeamByAuthor(ctx, pr.AuthorID)
 		if err != nil {
-			if errors.Is(err,  errs.ErrTeamNotFound){
+			if errors.Is(err, errs.ErrTeamNotFound) {
 				return errs.ErrTeamNotFound
 			}
 			return fmt.Errorf("checking team existence: %w", err)
 		}
 
 		_, err = s.pullRequestRepo.GetByID(ctx, pr.ID)
-		if err != nil && !errors.Is(err, errs.ErrPRNotFound){
+		if err != nil && !errors.Is(err, errs.ErrPRNotFound) {
 			return fmt.Errorf("checking existing PR: %w", err)
 		}
 		if err == nil {

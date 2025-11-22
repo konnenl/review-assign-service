@@ -9,15 +9,15 @@ import (
 )
 
 type Service struct {
-	Team *teamService
-	User *userService
+	Team        *teamService
+	User        *userService
 	PullRequest *pullRequestService
 }
 
 func NewService(trManager *manager.Manager, teamRepo teamRepository, userRepo userRepository, pullRequestRepo pullRequestRepository) *Service {
 	return &Service{
-		Team: newTeamService(trManager, teamRepo, userRepo),
-		User: newUserService(trManager, teamRepo, userRepo, pullRequestRepo),
+		Team:        newTeamService(trManager, teamRepo, userRepo),
+		User:        newUserService(trManager, teamRepo, userRepo, pullRequestRepo),
 		PullRequest: newPullRequestService(trManager, pullRequestRepo, teamRepo),
 	}
 }
@@ -36,9 +36,9 @@ type userRepository interface {
 	SetISActive(ctx context.Context, userID string, isActive bool) (model.User, error)
 }
 
-type pullRequestRepository interface{
+type pullRequestRepository interface {
 	GetReviews(ctx context.Context, userID string) ([]model.PullRequest, error)
 	GetByID(ctx context.Context, id string) (model.PullRequest, error)
-	CreatePullRequest(ctx context.Context, pr model.PullRequest) (error)
-	AssignReviewer(ctx context.Context, prID, userID string) (error)
+	CreatePullRequest(ctx context.Context, pr model.PullRequest) error
+	AssignReviewer(ctx context.Context, prID, userID string) error
 }

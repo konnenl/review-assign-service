@@ -10,9 +10,9 @@ import (
 
 	"github.com/konnen/review-assign-service/internal/dto"
 	"github.com/konnen/review-assign-service/internal/errs"
+	"github.com/konnen/review-assign-service/internal/mapper"
 	"github.com/konnen/review-assign-service/internal/model"
 	"github.com/konnen/review-assign-service/internal/validator"
-	"github.com/konnen/review-assign-service/internal/mapper"
 )
 
 type teamService interface {
