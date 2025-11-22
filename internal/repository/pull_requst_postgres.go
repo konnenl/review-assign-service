@@ -102,7 +102,7 @@ func (r *pullRequestPostgres) UnassignReviewer(ctx context.Context, prID, userID
 	return err
 }
 
-func (r *pullRequestPostgres) Merge(ctx context.Context, prID string, timeNow time.Time) error{
+func (r *pullRequestPostgres) Merge(ctx context.Context, prID string, timeNow time.Time) error {
 	query, args, _ := r.sq.
 		Update("pull_requests").
 		Set("status", model.StatusMerged).

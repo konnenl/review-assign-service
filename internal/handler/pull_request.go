@@ -80,7 +80,7 @@ func (h *pullRequestHandler) createPullRequest(w http.ResponseWriter, r *http.Re
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
-func (h *pullRequestHandler) merge(w http.ResponseWriter, r *http.Request){
+func (h *pullRequestHandler) merge(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.pullRequest.merge"
 	var mergeDTO dto.Merge
 	if err := json.NewDecoder(r.Body).Decode(&mergeDTO); err != nil {
@@ -120,7 +120,7 @@ func (h *pullRequestHandler) merge(w http.ResponseWriter, r *http.Request){
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
-func (h *pullRequestHandler) reassign(w http.ResponseWriter, r *http.Request){
+func (h *pullRequestHandler) reassign(w http.ResponseWriter, r *http.Request) {
 	const pth = "handler.pullRequest.reassign"
 	var reassignDTO dto.Reassign
 	if err := json.NewDecoder(r.Body).Decode(&reassignDTO); err != nil {
@@ -146,7 +146,7 @@ func (h *pullRequestHandler) reassign(w http.ResponseWriter, r *http.Request){
 			resp.Error.Code = dto.CodeNotFound
 			resp.Error.Message = dto.MsgNotFound
 			respondWithError(w, http.StatusNotFound, pth, err, resp, h.lgr)
-		} else if errors.Is(err, errs.ErrPRMerged){
+		} else if errors.Is(err, errs.ErrPRMerged) {
 			resp.Error.Code = dto.CodePRMerged
 			resp.Error.Message = dto.MsgPRMerged
 			respondWithError(w, http.StatusConflict, pth, err, resp, h.lgr)
@@ -161,7 +161,7 @@ func (h *pullRequestHandler) reassign(w http.ResponseWriter, r *http.Request){
 	prResp := mapper.PRtoDTO(prModel)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	if replacedBy == ""{
+	if replacedBy == "" {
 		replacedBy = " "
 	}
 	resp := dto.PullRequestResp{PullRequest: prResp, ReplacedBy: replacedBy}

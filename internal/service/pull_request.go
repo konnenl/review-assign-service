@@ -94,14 +94,14 @@ func randomUsers(members []model.User, n int) []model.User {
 	return result
 }
 
-func (s *pullRequestService) Merge(ctx context.Context, prID string) (model.PullRequest, error){
+func (s *pullRequestService) Merge(ctx context.Context, prID string) (model.PullRequest, error) {
 	const pth = "service.pullRequest.Merge"
 	var pr model.PullRequest
 	err := s.trManager.Do(ctx, func(ctx context.Context) error {
 		var err error
 		pr, err = s.pullRequestRepo.GetByID(ctx, prID)
-		if err != nil{
-			if errors.Is(err, errs.ErrPRNotFound){
+		if err != nil {
+			if errors.Is(err, errs.ErrPRNotFound) {
 				return errs.ErrPRNotFound
 			}
 			return fmt.Errorf("getting PR: %w", err)
@@ -121,34 +121,34 @@ func (s *pullRequestService) Merge(ctx context.Context, prID string) (model.Pull
 
 		return nil
 	})
-	if err != nil{
+	if err != nil {
 		return model.PullRequest{}, err
 	}
 	return pr, nil
 }
 
-func (s *pullRequestService) Reassign(ctx context.Context, prID, oldReviewerID string) (model.PullRequest, string, error){
+func (s *pullRequestService) Reassign(ctx context.Context, prID, oldReviewerID string) (model.PullRequest, string, error) {
 	const pth = "service.pullRequest.Reassign"
 	var pr model.PullRequest
 	var newReviewer model.User
 	err := s.trManager.Do(ctx, func(ctx context.Context) error {
 		var err error
 		pr, err = s.pullRequestRepo.GetByID(ctx, prID)
-		if err != nil{
-			if errors.Is(err, errs.ErrPRNotFound){
+		if err != nil {
+			if errors.Is(err, errs.ErrPRNotFound) {
 				return errs.ErrPRNotFound
 			}
 			return fmt.Errorf("getting PR: %w", err)
 		}
 		exists, err := s.userRepo.IsExistUser(ctx, oldReviewerID)
-		if err != nil{
+		if err != nil {
 			return fmt.Errorf("getting user: %w", err)
 		}
-		if !exists{
+		if !exists {
 			return errs.ErrUserNotFound
 		}
 
-		if pr.Status == model.StatusMerged{
+		if pr.Status == model.StatusMerged {
 			return errs.ErrPRMerged
 		}
 
@@ -157,7 +157,7 @@ func (s *pullRequestService) Reassign(ctx context.Context, prID, oldReviewerID s
 		for _, u := range pr.AssignedReviewers {
 			if u.ID == oldReviewerID {
 				oldReviewer = u
-			}else{
+			} else {
 				secReviewer = u.ID
 			}
 		}
@@ -172,7 +172,7 @@ func (s *pullRequestService) Reassign(ctx context.Context, prID, oldReviewerID s
 
 		var members []model.User
 		for _, u := range team.Members {
-			if u.ID != oldReviewerID && u.IsActive != nil && *u.IsActive == true && u.ID != pr.AuthorID && (secReviewer == "" || u.ID != secReviewer){
+			if u.ID != oldReviewerID && u.IsActive != nil && *u.IsActive == true && u.ID != pr.AuthorID && (secReviewer == "" || u.ID != secReviewer) {
 				members = append(members, u)
 			}
 		}
@@ -195,7 +195,7 @@ func (s *pullRequestService) Reassign(ctx context.Context, prID, oldReviewerID s
 
 		return nil
 	})
-	if err != nil{
+	if err != nil {
 		return model.PullRequest{}, "", err
 	}
 	return pr, newReviewer.ID, nil

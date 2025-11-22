@@ -88,7 +88,7 @@ func PRtoDTO(pr model.PullRequest) dto.PullRequest {
 		AssignedReviewers: reviewerIDs,
 	}
 
-	if pr.Status == model.StatusMerged{
+	if pr.Status == model.StatusMerged {
 		prDTO.MergedAt = pr.MergedAt
 	}
 	return prDTO
