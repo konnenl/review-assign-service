@@ -15,13 +15,15 @@ type Handler struct {
 	lgr  *slog.Logger
 	team *teamHandler
 	user *userHandler
+	pullRequest *pullRequestHandler
 }
 
-func NewHandler(lgr *slog.Logger, validator *validator.CustomValidator, teamService teamService, userService userService) *Handler {
+func NewHandler(lgr *slog.Logger, validator *validator.CustomValidator, teamService teamService, userService userService, pullRequestService pullRequestService) *Handler {
 	return &Handler{
 		lgr:  lgr,
 		team: newTeamHandler(lgr, validator, teamService),
 		user: newUserHandler(lgr, validator, userService),
+		pullRequest: newPullRequestHandler(lgr, validator, pullRequestService),
 	}
 }
 
@@ -33,6 +35,9 @@ func (h *Handler) InitRoutes(r *chi.Mux) *chi.Mux {
 	r.Route("/users", func(r chi.Router) {
 		r.Post("/setIsActive", h.user.setIsActive)
 		r.Get("/getReview", h.user.getReview)
+	})
+	r.Route("/pullRequest", func(r chi.Router){
+		r.Post("/create", h.pullRequest.createPullRequest)
 	})
 	return r
 }

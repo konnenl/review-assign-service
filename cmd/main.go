@@ -43,7 +43,7 @@ func main() {
 	v := validator.NewValidator()
 	r := repository.NewRepository(db)
 	s := service.NewService(trManager, r.Team, r.User, r.PullRequest)
-	h := handler.NewHandler(lgr, v, s.Team, s.User)
+	h := handler.NewHandler(lgr, v, s.Team, s.User, s.PullRequest)
 
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)

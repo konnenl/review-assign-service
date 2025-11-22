@@ -63,3 +63,28 @@ func PRtoUserReview(userID string, pullRequests []model.PullRequest) dto.UserRev
 		PullRequests: prs,
 	}
 }
+
+func PRtoModel(prDTO dto.PullRequestShort) model.PullRequest {
+	return model.PullRequest{
+		ID:       prDTO.ID,
+		Name:     prDTO.Name,
+		AuthorID: prDTO.AuthorID,
+		Status:   model.Status(prDTO.Status),
+		AssignedReviewers: nil,
+	}
+}
+
+func PRtoDTO(pr model.PullRequest) dto.PullRequest {
+	reviewerIDs := make([]string, len(pr.AssignedReviewers))
+	for i, u := range pr.AssignedReviewers {
+		reviewerIDs[i] = u.ID
+	}
+
+	return dto.PullRequest{
+		ID:                pr.ID,
+		Name:              pr.Name,
+		AuthorID:          pr.AuthorID,
+		Status:            string(pr.Status),
+		AssignedReviewers: reviewerIDs,
+	}
+}
