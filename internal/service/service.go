@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 
@@ -41,4 +42,5 @@ type pullRequestRepository interface {
 	GetByID(ctx context.Context, id string) (model.PullRequest, error)
 	CreatePullRequest(ctx context.Context, pr model.PullRequest) error
 	AssignReviewer(ctx context.Context, prID, userID string) error
+	Merge(ctx context.Context, prID string, timeNow time.Time) error
 }

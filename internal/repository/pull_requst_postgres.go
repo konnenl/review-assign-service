@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
@@ -54,7 +55,7 @@ func (r *pullRequestPostgres) GetByID(ctx context.Context, id string) (model.Pul
 	var pr model.PullRequest
 	query, args, _ := r.sq.
 		Select("id", "name", "author_id", "merged_at", "status").
-		From("pull_request").
+		From("pull_requests").
 		Where(squirrel.Eq{"id": id}).
 		ToSql()
 	err := r.db.GetContext(ctx, &pr, query, args...)
@@ -62,8 +63,23 @@ func (r *pullRequestPostgres) GetByID(ctx context.Context, id string) (model.Pul
 		if errors.Is(err, sql.ErrNoRows) {
 			return model.PullRequest{}, errs.ErrPRNotFound
 		}
-		return model.PullRequest{}, fmt.Errorf("GetByID query: %w", err)
+		return model.PullRequest{}, err
 	}
+
+	var reviewers []model.User
+	reviewersQuery, reviewersArgs, _ := r.sq.
+		Select("u.id", "u.name", "u.is_active", "u.team_name").
+		From("reviewers r").
+		Join("users u ON r.reviewer_id = u.id").
+		Where(squirrel.Eq{"r.pull_request_id": id}).
+		ToSql()
+
+	err = r.db.SelectContext(ctx, &reviewers, reviewersQuery, reviewersArgs...)
+	if err != nil {
+		return model.PullRequest{}, err
+	}
+
+	pr.AssignedReviewers = reviewers
 	return pr, nil
 }
 
@@ -72,6 +88,17 @@ func (r *pullRequestPostgres) AssignReviewer(ctx context.Context, prID, userID s
 		Insert("reviewers").
 		Columns("pull_request_id", "reviewer_id").
 		Values(prID, userID).
+		ToSql()
+	_, err := r.db.ExecContext(ctx, query, args...)
+	return err
+}
+
+func (r *pullRequestPostgres) Merge(ctx context.Context, prID string, timeNow time.Time) error{
+	query, args, _ := r.sq.
+		Update("pull_requests").
+		Set("status", model.StatusMerged).
+		Set("merged_at", timeNow).
+		Where(squirrel.Eq{"id": prID}).
 		ToSql()
 	_, err := r.db.ExecContext(ctx, query, args...)
 	return err

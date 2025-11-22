@@ -38,6 +38,7 @@ func (h *Handler) InitRoutes(r *chi.Mux) *chi.Mux {
 	})
 	r.Route("/pullRequest", func(r chi.Router) {
 		r.Post("/create", h.pullRequest.createPullRequest)
+		r.Post("/merge", h.pullRequest.merge)
 	})
 	return r
 }

@@ -1,5 +1,9 @@
 package dto
 
+import(
+	"time"
+)
+
 type PullRequestResp struct {
 	PullRequest PullRequest `json:"pr"`
 }
@@ -8,7 +12,7 @@ type PullRequestShort struct {
 	ID       string `json:"pull_request_id" validate:"required"`
 	Name     string `json:"pull_request_name" validate:"required"`
 	AuthorID string `json:"author_id" validate:"required"`
-	Status   string `json:"status"`
+	Status   string `json:"status,omitempty"`
 }
 
 type PullRequest struct {
@@ -17,4 +21,9 @@ type PullRequest struct {
 	AuthorID          string   `json:"author_id" validate:"required"`
 	Status            string   `json:"status" validate:"required"`
 	AssignedReviewers []string `json:"assigned_reviewers"`
+    MergedAt          *time.Time `json:"merged_at,omitempty"`
+}
+
+type Merge struct{
+	PullRequestID string `json:"pull_request_id" validate:"required"`
 }

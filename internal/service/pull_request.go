@@ -41,7 +41,7 @@ func (s *pullRequestService) CreatePullRequest(ctx context.Context, pr model.Pul
 
 		_, err = s.pullRequestRepo.GetByID(ctx, pr.ID)
 		if err != nil && !errors.Is(err, errs.ErrPRNotFound) {
-			return fmt.Errorf("checking existing PR: %w", err)
+			return fmt.Errorf("getting PR: %w", err)
 		}
 		if err == nil {
 			return errs.ErrPRExists
@@ -90,4 +90,37 @@ func randomUsers(members []model.User, n int) []model.User {
 	}
 
 	return result
+}
+
+func (s *pullRequestService) Merge(ctx context.Context, prID string) (model.PullRequest, error){
+	const pth = "service.pullRequest.Merge"
+	var pr model.PullRequest
+	err := s.trManager.Do(ctx, func(ctx context.Context) error {
+		var err error
+		pr, err = s.pullRequestRepo.GetByID(ctx, prID)
+		if err != nil{
+			if errors.Is(err, errs.ErrPRNotFound){
+				return errs.ErrPRNotFound
+			}
+			return fmt.Errorf("getting PR: %w", err)
+		}
+
+		if pr.Status == model.StatusMerged {
+			return nil
+		}
+
+		timeNow := time.Now().UTC()
+
+		if err := s.pullRequestRepo.Merge(ctx, prID, timeNow); err != nil {
+			return fmt.Errorf("merging PR: %w", err)
+		}
+		pr.Status = model.StatusMerged
+		pr.MergedAt = &timeNow
+
+		return nil
+	})
+	if err != nil{
+		return model.PullRequest{}, err
+	}
+	return pr, nil
 }

@@ -80,11 +80,16 @@ func PRtoDTO(pr model.PullRequest) dto.PullRequest {
 		reviewerIDs[i] = u.ID
 	}
 
-	return dto.PullRequest{
+	prDTO := dto.PullRequest{
 		ID:                pr.ID,
 		Name:              pr.Name,
 		AuthorID:          pr.AuthorID,
 		Status:            string(pr.Status),
 		AssignedReviewers: reviewerIDs,
 	}
+
+	if pr.Status == model.StatusMerged{
+		prDTO.MergedAt = pr.MergedAt
+	}
+	return prDTO
 }

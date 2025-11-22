@@ -15,7 +15,8 @@ import (
 )
 
 type pullRequestService interface {
-	CreatePullRequest(r context.Context, pr model.PullRequest) (model.PullRequest, error)
+	CreatePullRequest(ctx context.Context, pr model.PullRequest) (model.PullRequest, error)
+	Merge(ctx context.Context, prID string) (model.PullRequest, error)
 }
 
 type pullRequestHandler struct {
@@ -74,6 +75,46 @@ func (h *pullRequestHandler) createPullRequest(w http.ResponseWriter, r *http.Re
 	prResp := mapper.PRtoDTO(prModel)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	resp := dto.PullRequestResp{PullRequest: prResp}
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (h *pullRequestHandler) merge(w http.ResponseWriter, r *http.Request){
+	const pth = "handler.pullRequest.merge"
+	var mergeDTO dto.Merge
+	if err := json.NewDecoder(r.Body).Decode(&mergeDTO); err != nil {
+		resp := dto.ErrorResp{}
+		resp.Error.Code = dto.CodeValidationError
+		resp.Error.Message = dto.MsgValidationError
+		respondWithError(w, http.StatusBadRequest, pth, err, resp, h.lgr)
+		return
+	}
+
+	if err := h.validator.Validate(&mergeDTO); err != nil {
+		resp := dto.ErrorResp{}
+		resp.Error.Code = dto.CodeValidationError
+		resp.Error.Message = dto.MsgValidationError
+		respondWithError(w, http.StatusBadRequest, pth, validator.GetValidationErrors(err), resp, h.lgr)
+		return
+	}
+
+	prModel, err := h.pullRequestService.Merge(r.Context(), mergeDTO.PullRequestID)
+	if err != nil {
+		resp := dto.ErrorResp{}
+		if errors.Is(err, errs.ErrPRNotFound) {
+			resp.Error.Code = dto.CodeNotFound
+			resp.Error.Message = dto.MsgNotFound
+			respondWithError(w, http.StatusNotFound, pth, err, resp, h.lgr)
+		} else {
+			resp.Error.Code = dto.CodeInternalError
+			resp.Error.Message = dto.MsgInternalError
+			respondWithError(w, http.StatusInternalServerError, pth, err, resp, h.lgr)
+		}
+		return
+	}
+	prResp := mapper.PRtoDTO(prModel)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	resp := dto.PullRequestResp{PullRequest: prResp}
 	_ = json.NewEncoder(w).Encode(resp)
 }
