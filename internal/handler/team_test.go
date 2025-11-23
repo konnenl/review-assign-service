@@ -97,7 +97,9 @@ func TestTeamHandler_GetTeam(t *testing.T) {
 			h.getTeam(w, req)
 
 			res := w.Result()
-			defer res.Body.Close()
+			defer func(){
+				_ = res.Body.Close()
+			}()
 
 			require.Equal(t, tt.expectedStatus, res.StatusCode)
 
