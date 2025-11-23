@@ -73,6 +73,12 @@ func (h *userHandler) getReview(w http.ResponseWriter, r *http.Request) {
 	prsModel, err := h.userService.GetReview(r.Context(), userID)
 	if err != nil {
 		resp := dto.ErrorResp{}
+		if errors.Is(err, errs.ErrUserNotFound) {
+			resp.Error.Code = dto.CodeNotFound
+			resp.Error.Message = dto.MsgNotFound
+			respondWithError(w, http.StatusNotFound, pth, err, resp, h.lgr)
+			return
+		}
 		resp.Error.Code = dto.CodeInternalError
 		resp.Error.Message = dto.MsgInternalError
 		respondWithError(w, http.StatusInternalServerError, pth, err, resp, h.lgr)

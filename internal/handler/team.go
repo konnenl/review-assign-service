@@ -46,7 +46,7 @@ func (h *teamHandler) addTeam(w http.ResponseWriter, r *http.Request) {
 		resp := dto.ErrorResp{}
 		if errors.Is(err, errs.ErrTeamExists) {
 			resp.Error.Code = dto.CodeTeamExists
-			resp.Error.Message = dto.MsgValidationError
+			resp.Error.Message = dto.MsgTeamExists
 			respondWithError(w, http.StatusBadRequest, pth, err, resp, h.lgr)
 		} else {
 			resp.Error.Code = dto.CodeInternalError

@@ -139,9 +139,6 @@ func (h *pullRequestHandler) reassign(w http.ResponseWriter, r *http.Request) {
 	prResp := mapper.PRtoDTO(prModel)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	if replacedBy == "" {
-		replacedBy = " "
-	}
 	resp := dto.PullRequestResp{PullRequest: prResp, ReplacedBy: replacedBy}
 	_ = json.NewEncoder(w).Encode(resp)
 }

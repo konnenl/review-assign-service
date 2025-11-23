@@ -41,9 +41,23 @@ func (s *userService) SetIsActive(ctx context.Context, userID string, isActive b
 
 func (s *userService) GetReview(ctx context.Context, userID string) ([]model.PullRequest, error) {
 	const pth = "service.user.GetReview"
-	prs, err := s.pullRequestRepo.GetReviews(ctx, userID)
+	var prs []model.PullRequest
+	err := s.trManager.Do(ctx, func(ctx context.Context) error {
+		exists, err := s.userRepo.IsExistUser(ctx, userID)
+		if err != nil {
+			return fmt.Errorf("checking user existence: %w", err)
+		}
+		if !exists {
+			return errs.ErrUserNotFound
+		}
+		prs, err = s.pullRequestRepo.GetReviews(ctx, userID)
+		if err != nil {
+			return fmt.Errorf("getting users reviews: %w", err)
+		}
+		return nil
+	})
 	if err != nil {
-		return nil, fmt.Errorf("%s: getting users reviews: %w", pth, err)
+		return nil, fmt.Errorf("%s: %w", pth, err)
 	}
 	return prs, nil
 }
